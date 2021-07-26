@@ -81,6 +81,26 @@ def preprocess_text(document, stop_words):
     return tokens
 
 
+def createVocabulary(allWords):  # Создание словаря - все слова, упорядоченные по частоте появления
+
+    wCount = dict.fromkeys(allWords, 0)
+
+    for word in allWords:
+        wCount[word] += 1
+
+    wordsList = list(wCount.items())
+    wordsList.sort(key=lambda i: i[1], reverse=1)
+
+    sortedWords = []
+
+    for word in wordsList:
+        sortedWords.append(word[0])
+
+    wordIndexes = dict.fromkeys(allWords, 0)
+    for word in wordIndexes.keys():
+        wordIndexes[word] = sortedWords.index(word) + 1
+
+    return wordIndexes
 
 def words2Indexes(words, vocabulary, maxWordsCount):  # Преобразования листа слов в лист индексов
     wordsIndexes = []
@@ -109,3 +129,78 @@ def changeSetTo01(trainSet, conceptsCount):           # Преобразован
   for x in trainSet:
     out.append(changeXTo01(x, conceptsCount))
   return np.array(out)
+
+
+def compute_tfidf(corpus):
+    def compute_tf(text):
+        tf_text = Counter(text)
+        for i in tf_text:
+            tf_text[i] = tf_text[i] / float(len(text))
+
+        return tf_text
+
+    def compute_idf(word, corpus):
+        return math.log10(len(corpus) / sum([1.0 for i in corpus if word in i]))
+
+    documents_list = []
+    for text in corpus:
+        tf_idf_dictionary = {}
+        computed_tf = compute_tf(text)
+        for word in computed_tf:
+            tf_idf_dictionary[word] = computed_tf[word] * compute_idf(word, corpus)
+            documents_list.append(tf_idf_dictionary)
+
+    return documents_list
+
+
+def getSetFromIndexes(conceptIndexes, xLen,
+                      step):  # Формирование обучающей выборки по листу индексов концептов (разделение на короткие векторы)
+    xTrain = []
+    conceptLen = len(conceptIndexes)
+    index = 0
+    while (index + xLen <= conceptLen):
+        xTrain.append(conceptIndexes[index:index + xLen])
+        index += step
+    return xTrain
+
+
+def createSetsMultiClasses(conceptIndexes, xLen,
+                           step):  # Формирование обучающей и проверочной выборки выборки из 10 листов индексов от 10 классов
+    nClasses = len(conceptIndexes)
+    classesXTrain = []
+    for cI in conceptIndexes:  # Для каждого из 10 классов
+        classesXTrain.append(getSetFromIndexes(cI, xLen, step))  # Создаём обучающую выборку из индексов
+
+    xTrain = []  # Формируем один общий xTrain
+    yTrain = []
+
+    for t in range(nClasses):
+        xT = classesXTrain[t]
+        for i in range(len(xT)):
+            xTrain.append(xT[i])
+
+        currY = to_categorical(t, nClasses)  # Формируем yTrain по номеру класса
+        for i in range(len(xT)):
+            yTrain.append(currY)
+
+    xTrain = np.array(xTrain)
+    yTrain = np.array(yTrain)
+
+    return (xTrain, yTrain)
+
+
+def createTestsClasses(allIndexes, i, train_size):
+    # Формируем общий xTrain и общий xTest
+    X_train, X_test, y_train, y_test = np.array(
+        train_test_split(allIndexes, np.ones(len(allIndexes), 'int') * (i + 1), train_size=train_size))
+
+    return (X_train, y_train, X_test, y_test)
+
+
+
+def print_border(info):
+    print('*' * 150)
+    print('*' * 75 + info + '*' * 75)
+    print('*' * 150)
+
+
