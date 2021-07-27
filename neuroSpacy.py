@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/venv python
 # -*- coding: utf-8 -*-
 
 from testFunction import *

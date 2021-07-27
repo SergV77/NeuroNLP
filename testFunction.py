@@ -20,19 +20,21 @@ def readText(fileName, encod):
 ################################
 def open_text(path):
     texts = []
+    classes = []
     codecs_list = ['UTF-8', 'Windows-1251']
     for filename in os.listdir(path):
         for codec_s in codecs_list:
             try:
-                texts.append(readText(path_download_data+'/'+filename, codec_s)) # Считываем файл
+                texts.append(readText(path + '/' + filename, codec_s)) # Считываем файл
+                classes.append(filename.replace(".txt", ""))
                 break
             except UnicodeDecodeError:
                 next
-                print('Не прочитался файл: ', path_download_data+'/'+filename, 'Кодировка: ', codec_s)
+                print('Не прочитался файл: ', path + '/' + filename, 'Кодировка: ', codec_s)
             else:
                 next
 
-    return texts
+    return texts, classes
 
 def open_numpy(path):
     classes = []
