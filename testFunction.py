@@ -15,6 +15,35 @@ def readText(fileName, encod):
 
     return text
 
+################################
+# Загрузка файлов из директории
+################################
+def open_text(path):
+    texts = []
+    codecs_list = ['UTF-8', 'Windows-1251']
+    for filename in os.listdir(path):
+        for codec_s in codecs_list:
+            try:
+                texts.append(readText(path_download_data+'/'+filename, codec_s)) # Считываем файл
+                break
+            except UnicodeDecodeError:
+                next
+                print('Не прочитался файл: ', path_download_data+'/'+filename, 'Кодировка: ', codec_s)
+            else:
+                next
+
+    return texts
+
+def open_numpy(path):
+    classes = []
+    allLoadData = []
+    for filename in os.listdir(path):
+        loaded_data = np.load(path + '/' + filename, allow_pickle=True)
+        classes.append(filename.replace(".npy", ""))
+        allLoadData.append(loaded_data)
+
+    return allLoadData, classes
+
 ###########################
 # Очистка текста и превращение в набор слов
 ##########################
