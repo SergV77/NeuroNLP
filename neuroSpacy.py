@@ -179,49 +179,49 @@ for i in range(len(big_temp_list)):
   conceptIndexes.append(words2Indexes(big_temp_list[i], vocabulary, maxConceptsCount))
   print(i, classes[i], len(conceptIndexes[i]))
 
-normolized_concept = []
-for element in conceptIndexes:
-    x_array = np.array(element)
-    normolized_concept.append(preprocessing.normalize([x_array]))
-
 
 #
 # libs = {'vocabulary': vocabulary, 'classes': classes, 'xLen': xLen, 'step': step}
 # with open(path_save_train_info + '/train_info_202107261.pickle', 'wb') as outfile:
 #     pickle.dump(libs, outfile)
 # print("[+] Служебная информация сохранена")
+#
+# xTrainIndex = []
+# xTestIndex = []
+# for i in range(len(conceptIndexes)):
+#   (xTrain, yTrain, xTest, yTest) = createTestsClasses(conceptIndexes[i], i, 0.8)
+#   xTrainIndex.append(xTrain)
+#   xTestIndex.append(xTest)
+#
+# (xTrain, yTrain) = createSetsMultiClasses(xTrainIndex, xLen, step)
+# xTrain01 = changeSetTo01(xTrain, maxConceptsCount)
+#
+# (xVal, yVal) = createSetsMultiClasses(xTestIndex, xLen, step)
+# xVal01 = changeSetTo01(xVal, maxConceptsCount)
+#
+#
+# model_BOW = build_model_bow(maxConceptsCount)
+# mcp_save = ModelCheckpoint('models/model_BOW_best202107262', save_best_only=True, monitor='val_loss', mode='min')
+# history_model_BOW = model_BOW.fit(xTrain01, yTrain, epochs=40, batch_size=64, callbacks=[mcp_save], validation_data=(xVal01, yVal))
+#
+#
+# plt.plot(history_model_BOW.history['accuracy'],
+#          label='Доля верных ответов на обучающем наборе')
+# plt.plot(history_model_BOW.history['val_accuracy'],
+#          label='Доля верных ответов на проверочном наборе')
+# plt.xlabel('Эпоха обучения')
+# plt.ylabel('Доля верных ответов')
+# plt.legend()
+# plt.show()
+#
 
-xTrainIndex = []
-xTestIndex = []
-for i in range(len(conceptIndexes)):
-  (xTrain, yTrain, xTest, yTest) = createTestsClasses(conceptIndexes[i], i, 0.8)
-  xTrainIndex.append(xTrain)
-  xTestIndex.append(xTest)
-
-(xTrain, yTrain) = createSetsMultiClasses(xTrainIndex, xLen, step)
-xTrain01 = changeSetTo01(xTrain, maxConceptsCount)
-
-(xVal, yVal) = createSetsMultiClasses(xTestIndex, xLen, step)
-xVal01 = changeSetTo01(xVal, maxConceptsCount)
 
 
-model_BOW = build_model_bow(maxConceptsCount)
-mcp_save = ModelCheckpoint('models/model_BOW_best202107262', save_best_only=True, monitor='val_loss', mode='min')
-history_model_BOW = model_BOW.fit(xTrain01, yTrain, epochs=40, batch_size=64, callbacks=[mcp_save], validation_data=(xVal01, yVal))
-
-
-plt.plot(history_model_BOW.history['accuracy'],
-         label='Доля верных ответов на обучающем наборе')
-plt.plot(history_model_BOW.history['val_accuracy'],
-         label='Доля верных ответов на проверочном наборе')
-plt.xlabel('Эпоха обучения')
-plt.ylabel('Доля верных ответов')
-plt.legend()
-plt.show()
-
-
-
-
+# normolized_concept = []
+# for element in conceptIndexes:
+#     x_array = np.array(element)
+#     normolized_concept.append(preprocessing.normalize([x_array]))
+#
 
 
 
