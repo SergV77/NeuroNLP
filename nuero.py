@@ -52,11 +52,6 @@ for num in out_BOW[0]:
         dic[classes[data.index(num)]] = num * 100
 
 
-def translateDis(dictClass, item):
-    for k, v in dictClass.items():
-        if k == item:
-           return v
-
 for key, value in dic.items():
 
     print(f'Вероятность заболевания {translateDis(dictClass, key)} - ', round(value, 2), '%')

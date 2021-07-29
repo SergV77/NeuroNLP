@@ -6,7 +6,8 @@ from modelFunction import *
 from testSettings import *
 
 
-path = 'baseW/db_concepts'
+path_id = 'baseW/db_concepts'
+path_name = 'baseW/db_names_concepts'
 path_save_model = "models"
 path_save_dataset = "dataset"
 path_save_train_info = "trainInfo"
@@ -15,7 +16,7 @@ xLen = 50
 step = 2
 conceptIndexes = []
 
-allLoadData, classes = open_numpy(path)
+allLoadData, classes = open_numpy(path_id)
 nClasses = len(classes)
 list_all_words = [el for doc in allLoadData for item in doc for el in item]
 vocabulary = createVocabulary(list_all_words)

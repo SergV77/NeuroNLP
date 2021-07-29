@@ -22,7 +22,7 @@ path_download_data = 'baseW/db_word/'
 path_save_model = "models"
 path_save_dataset = "dataset"
 path_save_train_info = "trainInfo"
-
+path_save_dataset_allWord = "dataset/datasetAllWords/"
 
 text = []
 classes = []
@@ -48,136 +48,210 @@ print_border('ЗАГРУЗКА ФАЙЛОВ ОКОНЧЕНА')
 #   print(el)
 print_border('ФУНКЦИЯ ТОКЕНАЙЗЕР')
 
-processed_data = [];
+processed_data = []
+processed_data_all = []
 for doc in text:
     tokens = preprocess_text(doc, stop_words)
     processed_data.append(tokens)
+    processed_data_all += tokens
 
-count = 0
-for el in processed_data:
-    count += len(el)
-    print(len(el))
-print(count)
+temp_data = {}
 
-print_border('РАЗМЕТКА')
+for i, el in enumerate(processed_data):
+    if classes[i] in temp_data:
+        temp_data[classes[i]].extend(el)
+    else:
+        temp_data[classes[i]] = el
 
-comb_of_words = []
-for sent in text:
-    sent = sent.split('  ')
-    temp = []
-    for el in sent:
-        el = " ".join(el.split())
-        temp.append(el)
-    comb_of_words.append(temp)
+# print(len(temp_data))
+# print(temp_data)
 
-count = 0
-for el in comb_of_words:
-    count += len(el)
-    print(len(el))
-print(count)
+temp_data_count = {}
+for key, value in temp_data.items():
+    if key in temp_data_count:
+        temp_data_count[key].extend(Counter(value))
+    else:
+        temp_data_count[key] = Counter(value)
 
-print_border('СИНТАКТИЧЕСКИЙ РАЗБОР SPACY')
-
-comb_token = []
-for sent in text:
-    doc = nlp(sent)
-    temp_list = []
-    for token in doc:
-        chunk = ''
-        if token.pos_ == 'NOUN':
-            for w in token.children:
-                if w.pos_ == 'ADJ' or w.pos_ == 'DET' or w.pos_ == 'ADP' or w.pos_ == 'ADV':
-                    chunk = chunk + w.text + ' '
-            chunk = chunk + token.text
-
-        if chunk != '':
-            temp_list.append(chunk)
-
-    comb_token.append(temp_list)
-
-count = 0
-for el in comb_token:
-    count += len(el)
-    print(len(el))
-print(count)
-
-print_border('ОБЪЕДИНЕНИЕ ТОКЕНОВ 2')
-
-comb_token2 = []
-for sent in comb_of_words:
-    temp_doc = []
-    for words in sent:
-        doc = nlp(words)
-        temp_list = []
-        for token in doc:
-            chunk = ''
-            if token.pos_ == 'NOUN':
-                for w in token.children:
-                    if w.pos_ == 'ADJ' or w.pos_ == 'DET' or w.pos_ == 'ADP' or w.pos_ == 'ADV':
-                        chunk = chunk + w.text + ' '
-                chunk = chunk + token.text
-
-            if chunk != '':
-                temp_list.append(chunk)
-
-        temp_doc += temp_list
-
-    comb_token2.append(temp_doc)
-
-
-count = 0
-for el in comb_token2:
-    count += len(el)
-    print(len(el))
-print(count)
-
-print_border('ОБЩЕЕ ОБЪЕДИНЕНИЕ ТОКЕНОВ')
-
-
-big_temp_list = []
-for i, item_i in enumerate(processed_data):
-    temp = []
-    for j, item_j in enumerate(comb_of_words):
-        if i == j:
-            temp += item_i
-            for k, item_k in enumerate(comb_token):
-                if j == k:
-                    temp += item_j
-                    for l, item_l in enumerate(comb_token2):
-                        if k == l:
-                            temp += item_k
-                            temp += item_l
-
-    big_temp_list.append(temp)
-
-
-count = 0
-for el in big_temp_list:
-    count += len(el)
-    print(len(el))
-print(count)
-
-print_border('ПРОВЕРКА СЛОВАРЯ')
-list_all_words = [ item for doc in big_temp_list for item in doc ]
-# print(list_all_words)
-print(len(list_all_words))
-
-dictionary = Counter(list_all_words)
-# print(dictionary)
+dictionary = Counter(processed_data_all)
+print(dictionary)
 print(len(dictionary))
 
-vocabulary = createVocabulary(list_all_words)
-# print(vocabulary)
-print(len(vocabulary))
+dataSet = pd.DataFrame(0, index=[k for k, _ in temp_data_count.items()],
+                       columns=[el[0] for el in dictionary.items()])
 
-maxConceptsCount = len(vocabulary)
-xLen = 50
-step = 2
+print(dataSet)
 
-conceptIndexes = []
-for i in range(len(big_temp_list)):
-  conceptIndexes.append(words2Indexes(big_temp_list[i], vocabulary, maxConceptsCount))
-  print(i, classes[i], len(conceptIndexes[i]))
+for key, value in tqdm(temp_data_count.items()):
+    for el1 in value.items():
+        for el2 in dataSet.columns:
+                dataSet.loc[str(key), str(el1[0])] = int(el1[1])
+
+print(dataSet)
+# print(len(temp_data_count))
+
+# dictionary = Counter(processed_data_all)
+# print(dictionary)
+# dict_token_lemm = {}
+# for el in processed_data:
+#     if k in new_dict_id_name:
+#         new_dict_id_name[k].extend(v)
+#     else:
+#         new_dict_id_name[k] = v
+
+#
+# words = []
+# allwords = []
+# for i in range(len(text)):
+#   words.append(text2Words(text[i]))
+#   print(i, classes[i], len(words[i]))
+#   allwords += words[i]
+#
+# print(words)
+#
+# with open(path_save_dataset_allWord + 'ds_AW.csv', 'w') as file:
+#     writer = csv.writer(file)
+#     for doc in words:
+#         writer2.writerow(datarow)
+#
+# fieldnames = ['class', 'type', 'nodetype', 'deep', 'parent_id', 'level', 'route', 'ida', 'levela', 'idb', 'levelb',
+#               'value_a', 'value_b', 'value_c', 'value_d', 'sort']
+# with open('db/dataset_black/disease_symptoms2.csv', mode='w', encoding='utf-8', newline='') as file:
+#     file_writer = csv.DictWriter(file, delimiter=',', fieldnames=fieldnames)
+#     file_writer.writeheader()
+#     for el in symptoms:
+#         file_writer.writerow(el)
+#
+#
+# with open('db/dataset_black/disease_symptoms_names2.csv', mode='w', encoding='utf-8', newline='') as file:
+#     file_writer = csv.writer(file, delimiter=',', lineterminator='\n')
+#     file_writer.writerow(['id_symptoms', 'name_symptoms'])
+#     for key, value in symptoms_names.items():
+#         file_writer.writerow([key, value])
+#
+#
+#
+
+##################################################################################
+#
+# print_border('РАЗМЕТКА')
+#
+# comb_of_words = []
+# for sent in text:
+#     sent = sent.split('  ')
+#     temp = []
+#     for el in sent:
+#         el = " ".join(el.split())
+#         temp.append(el)
+#     comb_of_words.append(temp)
+#
+# count = 0
+# for el in comb_of_words:
+#     count += len(el)
+#     print(len(el))
+# print(count)
+#
+# print_border('СИНТАКТИЧЕСКИЙ РАЗБОР SPACY')
+#
+# comb_token = []
+# for sent in text:
+#     doc = nlp(sent)
+#     temp_list = []
+#     for token in doc:
+#         chunk = ''
+#         if token.pos_ == 'NOUN':
+#             for w in token.children:
+#                 if w.pos_ == 'ADJ' or w.pos_ == 'DET' or w.pos_ == 'ADP' or w.pos_ == 'ADV':
+#                     chunk = chunk + w.text + ' '
+#             chunk = chunk + token.text
+#
+#         if chunk != '':
+#             temp_list.append(chunk)
+#
+#     comb_token.append(temp_list)
+#
+# count = 0
+# for el in comb_token:
+#     count += len(el)
+#     print(len(el))
+# print(count)
+#
+# print_border('ОБЪЕДИНЕНИЕ ТОКЕНОВ 2')
+#
+# comb_token2 = []
+# for sent in comb_of_words:
+#     temp_doc = []
+#     for words in sent:
+#         doc = nlp(words)
+#         temp_list = []
+#         for token in doc:
+#             chunk = ''
+#             if token.pos_ == 'NOUN':
+#                 for w in token.children:
+#                     if w.pos_ == 'ADJ' or w.pos_ == 'DET' or w.pos_ == 'ADP' or w.pos_ == 'ADV':
+#                         chunk = chunk + w.text + ' '
+#                 chunk = chunk + token.text
+#
+#             if chunk != '':
+#                 temp_list.append(chunk)
+#
+#         temp_doc += temp_list
+#
+#     comb_token2.append(temp_doc)
+#
+#
+# count = 0
+# for el in comb_token2:
+#     count += len(el)
+#     print(len(el))
+# print(count)
+#
+# print_border('ОБЩЕЕ ОБЪЕДИНЕНИЕ ТОКЕНОВ')
+#
+# big_temp_list = []
+# for i, item_i in enumerate(processed_data):
+#     temp = []
+#     for j, item_j in enumerate(comb_of_words):
+#         if i == j:
+#             temp += item_i
+#             for k, item_k in enumerate(comb_token):
+#                 if j == k:
+#                     temp += item_j
+#                     for l, item_l in enumerate(comb_token2):
+#                         if k == l:
+#                             temp += item_k
+#                             temp += item_l
+#
+#     big_temp_list.append(temp)
+#
+#
+# count = 0
+# for el in big_temp_list:
+#     count += len(el)
+#     print(len(el))
+# print(count)
+#
+# print_border('ПРОВЕРКА СЛОВАРЯ')
+# list_all_words = [ item for doc in big_temp_list for item in doc ]
+# # print(list_all_words)
+# print(len(list_all_words))
+#
+# dictionary = Counter(list_all_words)
+# # print(dictionary)
+# print(len(dictionary))
+#
+# vocabulary = createVocabulary(list_all_words)
+# # print(vocabulary)
+# print(len(vocabulary))
+#
+# maxConceptsCount = len(vocabulary)
+# xLen = 50
+# step = 2
+#
+# conceptIndexes = []
+# for i in range(len(big_temp_list)):
+#   conceptIndexes.append(words2Indexes(big_temp_list[i], vocabulary, maxConceptsCount))
+#   print(i, classes[i], len(conceptIndexes[i]))
 
 
 #
@@ -262,11 +336,8 @@ for i in range(len(big_temp_list)):
 #     token_data.append([(w.text, w.lemma_) for w in doc])
 #
 # # for el in token_data:
-# #   print(el)
+# #   print(el)#
 #
-# print('*'*150)
-# print('*'*75 + 'ЧАСТИРЕЧНАЯ РАЗМЕТКА SPACY' + '*'*75)
-# print('*'*150)
 
 # tag_data = []
 # for doc in text:

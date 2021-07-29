@@ -86,8 +86,6 @@ def text2Words(text):  # функция будет принимать в себ�
     return words  # фунция возвращает набор слов
 
 
-
-
 def preprocess_text(document, stop_words):
     stemmer = WordNetLemmatizer()
     # Удаление специальных символов
@@ -227,6 +225,10 @@ def createTestsClasses(allIndexes, i, train_size):
 
     return (X_train, y_train, X_test, y_test)
 
+def translateDis(dictClass, item):
+    for k, v in dictClass.items():
+        if k == item:
+           return v
 
 
 def print_border(info):

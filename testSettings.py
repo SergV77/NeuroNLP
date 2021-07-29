@@ -3,6 +3,7 @@ import os
 import re
 import pickle
 import numpy as np
+import pandas as pd
 import requests
 import json
 import pandas
