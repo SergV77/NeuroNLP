@@ -1,9 +1,10 @@
 #!/usr/bin/venv python
 # -*- coding: utf-8 -*-
-
+from testSettings import *
 from testFunction import *
 from modelFunction import *
-from testSettings import *
+from datasetFunction import *
+
 
 """
     ВХОДНОЙ ТЕКСТ   
@@ -24,30 +25,12 @@ path_save_dataset = "dataset"
 path_save_train_info = "trainInfo"
 path_save_dataset_allWord = "dataset/datasetAllWords/"
 
-text = []
-classes = []
-n = 0
-codecs_list = ['UTF-8', 'Windows-1251']
-
-for filename in tqdm(os.listdir(path_download_data)): # Проходим по всем файлам в директории
-  n +=1
-  for codec_s in codecs_list:
-    try:
-      text.append(readText(path_download_data+'/'+filename, codec_s)) # Преобразуем файл в одну строку и добавляем в agreements
-      classes.append(filename.replace(".txt", ""))
-      print('Файл прочитался: ', path_download_data+'/'+filename, 'Кодировка: ', codec_s)
-      break
-    except UnicodeDecodeError:
-       print('Не прочитался файл: ', path_download_data+'/'+filename, 'Кодировка: ', codec_s)
-    else:
-       next
-
+text, classes = open_text(path_download_data)
 print_border('ЗАГРУЗКА ФАЙЛОВ ОКОНЧЕНА')
-#
-# for el in text:
-#   print(el)
-print_border('ФУНКЦИЯ ТОКЕНАЙЗЕР')
 
+#######################################################################
+#######################################################################
+print_border('ТОКЕНИЗАЦИЯ И ЛЕММАТИЗАЦИЯ ТЕКСТА')
 processed_data = []
 processed_data_all = []
 for doc in text:
@@ -55,39 +38,56 @@ for doc in text:
     processed_data.append(tokens)
     processed_data_all += tokens
 
-temp_data = {}
-
-for i, el in enumerate(processed_data):
-    if classes[i] in temp_data:
-        temp_data[classes[i]].extend(el)
-    else:
-        temp_data[classes[i]] = el
-
-# print(len(temp_data))
-# print(temp_data)
-
-temp_data_count = {}
-for key, value in temp_data.items():
-    if key in temp_data_count:
-        temp_data_count[key].extend(Counter(value))
-    else:
-        temp_data_count[key] = Counter(value)
-
+temp_data_count = create_count_dictionary(processed_data, classes)
 dictionary = Counter(processed_data_all)
 print(dictionary)
 print(len(dictionary))
 
-dataSet = pd.DataFrame(0, index=[k for k, _ in temp_data_count.items()],
-                       columns=[el[0] for el in dictionary.items()])
+print_border('СОЗДАНИЕ ДАТАСЕТА ИЗ ЛЕММАТИЗИРОВАННЫХ ДАННЫХ')
 
+dataset_tok_lem_one, dataSet = make_dataset_full(temp_data_count, dictionary)
 print(dataSet)
+print(dataset_tok_lem_one)
 
-for key, value in tqdm(temp_data_count.items()):
-    for el1 in value.items():
-        for el2 in dataSet.columns:
-                dataSet.loc[str(key), str(el1[0])] = int(el1[1])
 
+print_border('СОХРАНЕНИЕ ГОТОВОГО ДАТАСЕТА ИЗ ЛЕММАТИЗИРОВАННЫХ ДАННЫХ')
+
+save_dataset(dataSet, path_save_dataset_allWord, 'dataset_token_lemm')
+save_dataset(dataset_tok_lem_one, path_save_dataset_allWord, 'dataset_token_lemm_one')
+
+########################################################################################
+########################################################################################
+print_border('ТОКЕНИЗАЦИЯ ТЕКСТА')
+words = []
+allwords = []
+for i in range(len(text)):
+  words.append(text2Words(text[i]))
+  print(i, classes[i], len(words[i]))
+  allwords += words[i]
+
+
+temp_data_count = create_count_dictionary(words, classes)
+dictionary = Counter(allwords)
+print(dictionary)
+print(len(dictionary))
+
+print_border('СОЗДАНИЕ ДАТАСЕТА ИЗ ДАННЫХ')
+
+dataset_tok_one, dataSet = make_dataset_full(temp_data_count, dictionary)
 print(dataSet)
+print(dataset_tok_one)
+
+print_border('СОХРАНЕНИЕ ГОТОВОГО ДАТАСЕТА ИЗ ОРИГЕНАЛЬНЫХ ДАННЫХ')
+
+save_dataset(dataSet, path_save_dataset_allWord, 'dataset_token')
+save_dataset(dataset_tok_one, path_save_dataset_allWord, 'dataset_token_one')
+
+
+
+
+
+
+
 # print(len(temp_data_count))
 
 # dictionary = Counter(processed_data_all)

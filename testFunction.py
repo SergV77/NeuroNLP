@@ -22,7 +22,7 @@ def open_text(path):
     texts = []
     classes = []
     codecs_list = ['UTF-8', 'Windows-1251']
-    for filename in os.listdir(path):
+    for filename in tqdm(os.listdir(path)):
         for codec_s in codecs_list:
             try:
                 texts.append(readText(path + '/' + filename, codec_s)) # Считываем файл

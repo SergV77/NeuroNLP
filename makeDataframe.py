@@ -45,7 +45,7 @@ for key, value in tqdm(new_dict_id_name.items()):
 
 
 
-dataSet.to_pickle(path_save_dataset + 'datasetUmkb')
+dataSet.to_pickle(path_save_dataset + 'datase')
 dataSet.to_csv(path_save_dataset + 'datasetUmkb.csv')
 
 with open(path_save_dataset + 'datasetUmkb.npy', 'wb') as np_file:
