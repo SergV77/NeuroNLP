@@ -22,8 +22,6 @@ def create_count_dictionary(data, classes):
 
     return temp_data_count
 
-
-
 def make_datset_zero(data, dictionary):
     dataSet = pd.DataFrame(0, index=[k for k, _ in data.items()],
                            columns=[el[0] for el in dictionary.items()])
@@ -48,3 +46,15 @@ def save_dataset(dataSet, path, name):
         np.save(np_file, dataSet)
 
     print("[+] ФАЙЛЫ СОХРАНЕНЫ")
+
+def normolize_concept(conceptIndexes):
+    normolized_concept = []
+    for element in conceptIndexes:
+        x_array = np.array(element)
+        normolized_concept.append(preprocessing.normalize([x_array]))
+
+    return normolized_concept
+
+
+
+

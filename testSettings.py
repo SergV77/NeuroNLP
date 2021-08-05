@@ -7,9 +7,11 @@ import pandas as pd
 import requests
 import json
 import pandas
+import math
+
 from tqdm import tqdm
 from collections import Counter
-import math
+from functools import reduce
 
 ####################***TENSORFLOW & KERAS LIB***####################
 import tensorflow as tf

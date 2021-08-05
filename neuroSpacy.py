@@ -4,7 +4,7 @@ from testSettings import *
 from testFunction import *
 from modelFunction import *
 from datasetFunction import *
-
+from scacyFunction import *
 
 """
     ВХОДНОЙ ТЕКСТ   
@@ -38,25 +38,9 @@ for doc in text:
     processed_data.append(tokens)
     processed_data_all += tokens
 
-temp_data_count = create_count_dictionary(processed_data, classes)
-dictionary = Counter(processed_data_all)
-print(dictionary)
-print(len(dictionary))
 
-print_border('СОЗДАНИЕ ДАТАСЕТА ИЗ ЛЕММАТИЗИРОВАННЫХ ДАННЫХ')
-
-dataset_tok_lem_one, dataSet = make_dataset_full(temp_data_count, dictionary)
-print(dataSet)
-print(dataset_tok_lem_one)
-
-
-print_border('СОХРАНЕНИЕ ГОТОВОГО ДАТАСЕТА ИЗ ЛЕММАТИЗИРОВАННЫХ ДАННЫХ')
-
-save_dataset(dataSet, path_save_dataset_allWord, 'dataset_token_lemm')
-save_dataset(dataset_tok_lem_one, path_save_dataset_allWord, 'dataset_token_lemm_one')
-
-########################################################################################
-########################################################################################
+########################################################################
+########################################################################
 print_border('ТОКЕНИЗАЦИЯ ТЕКСТА')
 words = []
 allwords = []
@@ -66,109 +50,43 @@ for i in range(len(text)):
   allwords += words[i]
 
 
-temp_data_count = create_count_dictionary(words, classes)
-dictionary = Counter(allwords)
-print(dictionary)
-print(len(dictionary))
+########################################################################
+########################################################################
+print_border('РАЗМЕТКА')
 
-print_border('СОЗДАНИЕ ДАТАСЕТА ИЗ ДАННЫХ')
+comb_of_words = make_markup(text)
 
-dataset_tok_one, dataSet = make_dataset_full(temp_data_count, dictionary)
-print(dataSet)
-print(dataset_tok_one)
+count = 0
+for el in comb_of_words:
+    count += len(el)
+    print(len(el))
+print(count)
 
-print_border('СОХРАНЕНИЕ ГОТОВОГО ДАТАСЕТА ИЗ ОРИГЕНАЛЬНЫХ ДАННЫХ')
+print_border('СИНТАКТИЧЕСКИЙ РАЗБОР SPACY')
 
-save_dataset(dataSet, path_save_dataset_allWord, 'dataset_token')
-save_dataset(dataset_tok_one, path_save_dataset_allWord, 'dataset_token_one')
-
-
+comb_token = syntax_parsing(text, nlp)
 
 
 
+comb_token = []
+for sent in text:
+    doc = nlp(sent)
+    temp_list = []
+    for token in doc:
+        chunk = ''
+        if token.pos_ == 'NOUN':
+            for w in token.children:
+                if w.pos_ == 'ADJ' or w.pos_ == 'DET' or w.pos_ == 'ADP' or w.pos_ == 'ADV':
+                    chunk = chunk + w.text + ' '
+            chunk = chunk + token.text
 
+        if chunk != '':
+            temp_list.append(chunk)
 
-# print(len(temp_data_count))
+    comb_token.append(temp_list)
 
-# dictionary = Counter(processed_data_all)
-# print(dictionary)
-# dict_token_lemm = {}
-# for el in processed_data:
-#     if k in new_dict_id_name:
-#         new_dict_id_name[k].extend(v)
-#     else:
-#         new_dict_id_name[k] = v
+print(comb_token)
 
-#
-# words = []
-# allwords = []
-# for i in range(len(text)):
-#   words.append(text2Words(text[i]))
-#   print(i, classes[i], len(words[i]))
-#   allwords += words[i]
-#
-# print(words)
-#
-# with open(path_save_dataset_allWord + 'ds_AW.csv', 'w') as file:
-#     writer = csv.writer(file)
-#     for doc in words:
-#         writer2.writerow(datarow)
-#
-# fieldnames = ['class', 'type', 'nodetype', 'deep', 'parent_id', 'level', 'route', 'ida', 'levela', 'idb', 'levelb',
-#               'value_a', 'value_b', 'value_c', 'value_d', 'sort']
-# with open('db/dataset_black/disease_symptoms2.csv', mode='w', encoding='utf-8', newline='') as file:
-#     file_writer = csv.DictWriter(file, delimiter=',', fieldnames=fieldnames)
-#     file_writer.writeheader()
-#     for el in symptoms:
-#         file_writer.writerow(el)
-#
-#
-# with open('db/dataset_black/disease_symptoms_names2.csv', mode='w', encoding='utf-8', newline='') as file:
-#     file_writer = csv.writer(file, delimiter=',', lineterminator='\n')
-#     file_writer.writerow(['id_symptoms', 'name_symptoms'])
-#     for key, value in symptoms_names.items():
-#         file_writer.writerow([key, value])
-#
-#
-#
-
-##################################################################################
-#
-# print_border('РАЗМЕТКА')
-#
-# comb_of_words = []
-# for sent in text:
-#     sent = sent.split('  ')
-#     temp = []
-#     for el in sent:
-#         el = " ".join(el.split())
-#         temp.append(el)
-#     comb_of_words.append(temp)
-#
-# count = 0
-# for el in comb_of_words:
-#     count += len(el)
-#     print(len(el))
-# print(count)
-#
-# print_border('СИНТАКТИЧЕСКИЙ РАЗБОР SPACY')
-#
-# comb_token = []
-# for sent in text:
-#     doc = nlp(sent)
-#     temp_list = []
-#     for token in doc:
-#         chunk = ''
-#         if token.pos_ == 'NOUN':
-#             for w in token.children:
-#                 if w.pos_ == 'ADJ' or w.pos_ == 'DET' or w.pos_ == 'ADP' or w.pos_ == 'ADV':
-#                     chunk = chunk + w.text + ' '
-#             chunk = chunk + token.text
-#
-#         if chunk != '':
-#             temp_list.append(chunk)
-#
-#     comb_token.append(temp_list)
 #
 # count = 0
 # for el in comb_token:
@@ -178,26 +96,7 @@ save_dataset(dataset_tok_one, path_save_dataset_allWord, 'dataset_token_one')
 #
 # print_border('ОБЪЕДИНЕНИЕ ТОКЕНОВ 2')
 #
-# comb_token2 = []
-# for sent in comb_of_words:
-#     temp_doc = []
-#     for words in sent:
-#         doc = nlp(words)
-#         temp_list = []
-#         for token in doc:
-#             chunk = ''
-#             if token.pos_ == 'NOUN':
-#                 for w in token.children:
-#                     if w.pos_ == 'ADJ' or w.pos_ == 'DET' or w.pos_ == 'ADP' or w.pos_ == 'ADV':
-#                         chunk = chunk + w.text + ' '
-#                 chunk = chunk + token.text
-#
-#             if chunk != '':
-#                 temp_list.append(chunk)
-#
-#         temp_doc += temp_list
-#
-#     comb_token2.append(temp_doc)
+# comb_token2 = syntax_parsing_comb(comb_of_words, nlp)
 #
 #
 # count = 0
@@ -208,28 +107,21 @@ save_dataset(dataset_tok_one, path_save_dataset_allWord, 'dataset_token_one')
 #
 # print_border('ОБЩЕЕ ОБЪЕДИНЕНИЕ ТОКЕНОВ')
 #
-# big_temp_list = []
-# for i, item_i in enumerate(processed_data):
-#     temp = []
-#     for j, item_j in enumerate(comb_of_words):
-#         if i == j:
-#             temp += item_i
-#             for k, item_k in enumerate(comb_token):
-#                 if j == k:
-#                     temp += item_j
-#                     for l, item_l in enumerate(comb_token2):
-#                         if k == l:
-#                             temp += item_k
-#                             temp += item_l
-#
-#     big_temp_list.append(temp)
-#
+# big_temp_list = [reduce(lambda x,y: x + y, el) for el in list(map(lambda x: list(x),
+#                                                                    list(zip(processed_data,
+#                                                                             comb_of_words,
+#                                                                             comb_token,
+#                                                                             comb_token2))))]
 #
 # count = 0
 # for el in big_temp_list:
 #     count += len(el)
 #     print(len(el))
 # print(count)
+# print(big_temp_list)
+#
+#
+#
 #
 # print_border('ПРОВЕРКА СЛОВАРЯ')
 # list_all_words = [ item for doc in big_temp_list for item in doc ]
@@ -252,7 +144,7 @@ save_dataset(dataset_tok_one, path_save_dataset_allWord, 'dataset_token_one')
 # for i in range(len(big_temp_list)):
 #   conceptIndexes.append(words2Indexes(big_temp_list[i], vocabulary, maxConceptsCount))
 #   print(i, classes[i], len(conceptIndexes[i]))
-
+#
 
 #
 # libs = {'vocabulary': vocabulary, 'classes': classes, 'xLen': xLen, 'step': step}
@@ -380,4 +272,46 @@ save_dataset(dataset_tok_one, path_save_dataset_allWord, 'dataset_token_one')
 # X_train_tfidf.shape
 #
 #
+#
+# with open(path_save_dataset_allWord + 'ds_AW.csv', 'w') as file:
+#     writer = csv.writer(file)
+#     for doc in words:
+#         writer2.writerow(datarow)
+#
+# fieldnames = ['class', 'type', 'nodetype', 'deep', 'parent_id', 'level', 'route', 'ida', 'levela', 'idb', 'levelb',
+#               'value_a', 'value_b', 'value_c', 'value_d', 'sort']
+# with open('db/dataset_black/disease_symptoms2.csv', mode='w', encoding='utf-8', newline='') as file:
+#     file_writer = csv.DictWriter(file, delimiter=',', fieldnames=fieldnames)
+#     file_writer.writeheader()
+#     for el in symptoms:
+#         file_writer.writerow(el)
+#
+#
+# with open('db/dataset_black/disease_symptoms_names2.csv', mode='w', encoding='utf-8', newline='') as file:
+#     file_writer = csv.writer(file, delimiter=',', lineterminator='\n')
+#     file_writer.writerow(['id_symptoms', 'name_symptoms'])
+#     for key, value in symptoms_names.items():
+#         file_writer.writerow([key, value])
+#
+#
+#
+# print(len(temp_data_count))
 
+# dictionary = Counter(processed_data_all)
+# print(dictionary)
+# dict_token_lemm = {}
+# for el in processed_data:
+#     if k in new_dict_id_name:
+#         new_dict_id_name[k].extend(v)
+#     else:
+#         new_dict_id_name[k] = v
+
+#
+# words = []
+# allwords = []
+# for i in range(len(text)):
+#   words.append(text2Words(text[i]))
+#   print(i, classes[i], len(words[i]))
+#   allwords += words[i]
+#
+# print(words)
